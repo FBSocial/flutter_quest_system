@@ -31,7 +31,7 @@ class _QuestBuilderState<T extends QuestNode> extends State<QuestBuilder<T>> {
   @override
   void initState() {
     quest = widget.quest;
-    if (quest == null) {
+    if (quest == null && widget.questId != null) {
       quest = QuestSystem.getQuest<T>(widget.questId!);
       // quest unregistered
       if (quest == null) {
