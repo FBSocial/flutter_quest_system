@@ -25,42 +25,51 @@ class RouteCondition {
   }
 }
 
-class RouteTrigger extends QuestTrigger implements NavigatorObserver {
+typedef DidPushCallback = void Function(
+    Route<dynamic> route, Route<dynamic>? previousRoute);
+
+class MyNavigatorObserver extends NavigatorObserver {
+  final DidPushCallback didPushCallBack;
+  final DidPushCallback didPopCallBack;
+  final DidPushCallback didRemoveCallBack;
+  final DidPushCallback didReplaceCallBack;
+  MyNavigatorObserver(this.didPushCallBack, this.didPopCallBack,
+      this.didRemoveCallBack, this.didReplaceCallBack);
+}
+
+class RouteTrigger extends QuestTrigger {
   static late RouteTrigger instance = RouteTrigger();
 
-  final NavigatorObserver _navigatorObserver = NavigatorObserver();
+  late NavigatorObserver navigatorObserver;
 
-  @override
+  RouteTrigger() {
+    navigatorObserver = MyNavigatorObserver(didPush, didPush, didPush, didPush);
+  }
+
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.settings.name != null) {
       dispatch(QuestTriggerData(
           condition: RouteCondition(
               routeName: route.settings.name!, isRemove: false)));
     }
-    _navigatorObserver.didPush(route, previousRoute);
   }
 
-  @override
   void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.settings.name != null) {
       dispatch(QuestTriggerData(
           condition:
               RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
-    _navigatorObserver.didPop(route, previousRoute);
   }
 
-  @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
     if (route.settings.name != null) {
       dispatch(QuestTriggerData(
           condition:
               RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
-    _navigatorObserver.didRemove(route, previousRoute);
   }
 
-  @override
   void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
     if (newRoute?.settings.name != null) {
       dispatch(QuestTriggerData(
@@ -72,20 +81,5 @@ class RouteTrigger extends QuestTrigger implements NavigatorObserver {
           condition: RouteCondition(
               routeName: oldRoute!.settings.name!, isRemove: true)));
     }
-    _navigatorObserver.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
-
-  @override
-  void didStartUserGesture(Route route, Route? previousRoute) {
-    _navigatorObserver.didStartUserGesture(route, previousRoute);
-  }
-
-  @override
-  void didStopUserGesture() {
-    _navigatorObserver.didStopUserGesture();
-  }
-
-  @override
-  // TODO: implement navigator
-  NavigatorState? get navigator => throw UnimplementedError();
 }
