@@ -1,4 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/cupertino.dart';
+import 'package:quest_system/internal/event_dispatcher.dart';
+import 'package:quest_system/internal/quest_system.dart';
 import 'package:quest_system/internal/trigger/quest_trigger.dart';
 
 class RouteCondition {
@@ -25,7 +29,8 @@ class RouteCondition {
   }
 }
 
-class RouteTrigger extends QuestTrigger with NavigatorObserver {
+class RouteTrigger extends NavigatorObserver
+    with EventDispatcher<QuestTriggerData> {
   static late RouteTrigger instance = RouteTrigger();
 
   @override
@@ -43,7 +48,7 @@ class RouteTrigger extends QuestTrigger with NavigatorObserver {
     if (route.settings.name != null) {
       dispatch(QuestTriggerData(
           condition:
-          RouteCondition(routeName: route.settings.name!, isRemove: true)));
+              RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
     super.didPop(route, previousRoute);
   }
@@ -53,7 +58,7 @@ class RouteTrigger extends QuestTrigger with NavigatorObserver {
     if (route.settings.name != null) {
       dispatch(QuestTriggerData(
           condition:
-          RouteCondition(routeName: route.settings.name!, isRemove: true)));
+              RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
     super.didRemove(route, previousRoute);
   }
@@ -71,5 +76,11 @@ class RouteTrigger extends QuestTrigger with NavigatorObserver {
               routeName: oldRoute!.settings.name!, isRemove: true)));
     }
     super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+  }
+
+  @override
+  void dispatch(QuestTriggerData data) {
+    if (QuestSystem.verbose) log("QuestTrigger dispatch $data", name: "QUEST");
+    super.dispatch(data);
   }
 }
