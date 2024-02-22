@@ -1,8 +1,4 @@
-import 'dart:developer';
-
 import 'package:flutter/cupertino.dart';
-import 'package:quest_system/internal/event_dispatcher.dart';
-import 'package:quest_system/internal/quest_system.dart';
 import 'package:quest_system/internal/trigger/quest_trigger.dart';
 
 class RouteCondition {
@@ -29,9 +25,10 @@ class RouteCondition {
   }
 }
 
-class RouteTrigger extends NavigatorObserver
-    with EventDispatcher<QuestTriggerData> {
+class RouteTrigger extends QuestTrigger implements NavigatorObserver {
   static late RouteTrigger instance = RouteTrigger();
+
+  final NavigatorObserver _navigatorObserver = NavigatorObserver();
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -40,7 +37,7 @@ class RouteTrigger extends NavigatorObserver
           condition: RouteCondition(
               routeName: route.settings.name!, isRemove: false)));
     }
-    super.didPush(route, previousRoute);
+    _navigatorObserver.didPush(route, previousRoute);
   }
 
   @override
@@ -50,7 +47,7 @@ class RouteTrigger extends NavigatorObserver
           condition:
               RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
-    super.didPop(route, previousRoute);
+    _navigatorObserver.didPop(route, previousRoute);
   }
 
   @override
@@ -60,7 +57,7 @@ class RouteTrigger extends NavigatorObserver
           condition:
               RouteCondition(routeName: route.settings.name!, isRemove: true)));
     }
-    super.didRemove(route, previousRoute);
+    _navigatorObserver.didRemove(route, previousRoute);
   }
 
   @override
@@ -75,12 +72,20 @@ class RouteTrigger extends NavigatorObserver
           condition: RouteCondition(
               routeName: oldRoute!.settings.name!, isRemove: true)));
     }
-    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    _navigatorObserver.didReplace(newRoute: newRoute, oldRoute: oldRoute);
   }
 
   @override
-  void dispatch(QuestTriggerData data) {
-    if (QuestSystem.verbose) log("QuestTrigger dispatch $data", name: "QUEST");
-    super.dispatch(data);
+  void didStartUserGesture(Route route, Route? previousRoute) {
+    _navigatorObserver.didStartUserGesture(route, previousRoute);
   }
+
+  @override
+  void didStopUserGesture() {
+    _navigatorObserver.didStopUserGesture();
+  }
+
+  @override
+  // TODO: implement navigator
+  NavigatorState? get navigator => throw UnimplementedError();
 }
